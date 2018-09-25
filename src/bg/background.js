@@ -1,6 +1,22 @@
 var enabled = false;
 chrome.browserAction.setBadgeText({text:"X"});
 
+var matchesWhitelist = function(url){
+	if(localStorage.getItem("store.settings.url")){
+		var urlList = localStorage.getItem("store.settings.url").replace(/"/g,'');
+		if(urlList){
+			var urls = urlList.split(";");
+			for(var i in urls){
+				var keyword = urls[i].trim();
+				if(url.indexOf(keyword)>-1){
+					return true;
+				}
+			}
+		}
+	}
+	return false;
+};
+
 var matchesBlacklist = function(url){
 	if(localStorage.getItem("store.settings.url")){
 		var urlList = localStorage.getItem("store.settings.url").replace(/"/g,'');
@@ -20,7 +36,7 @@ var matchesBlacklist = function(url){
 var requestHandler = function(data){
 	if(typeof data){
 		console.log(chrome.i18n.getMessage('inHandler'), "onBeforeRequest", data);
-		if(!matchesBlacklist(data.url)){
+		if(matchesWhitelist(data.url)){
 			if(data.url.indexOf("cachebusterTimestamp")==-1){
 				var url=""
 				if(data.url.indexOf('?')>-1){
